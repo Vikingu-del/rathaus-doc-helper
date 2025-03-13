@@ -21,10 +21,8 @@
         <label>Select a service:</label>
         <select v-model="selectedService">
           <option value="">Please select a service</option>
-          <option value="residence">Registration of residence</option>
-          <option value="id">ID card application</option>
-          <option value="passport">Passport application</option>
-          <option value="driving">Driving license</option>
+          <option value="residence">Aplication for Residence Permit</option>
+          <option value="extension">Aplication for Extension of Residence Permit</option>
         </select>
       </div>
 
