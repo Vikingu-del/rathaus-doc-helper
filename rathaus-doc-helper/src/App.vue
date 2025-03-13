@@ -2,7 +2,7 @@
 
 <template>
   <div id="app">
-    <!-- Sticky Navigation -->
+    <!-- Sticky Navigation remains unchanged -->
     <header class="sticky-nav">
       <div class="logo">City of Wolfsburg</div>
       <nav>
@@ -21,21 +21,22 @@
     <div class="container">
       <h1>Welcome to the Rathaus Registration</h1>
       <form @submit.prevent="handleSubmit">
-        <!-- This container is shown only if registration hasn't been answered -->
+        <!-- Registration Question -->
         <div v-if="isRegistered === null" class="containerButtons">
           <label>Are you already registered?</label>
           <button type="button" @click="handleRegistration(true)">Yes</button>
           <button type="button" @click="handleRegistration(false)">No</button>
         </div>
         
-        <!-- Once an answer is provided the first container disappears -->
-        <div v-if="isRegistered !== null" class="containerButtons">
+        <!-- EU Citizenship Question -->
+        <div v-if="isRegistered !== null && isEU === null" class="containerButtons">
           <label>Are you an EU citizen?</label>
           <button type="button" @click="handleCitizenship(true)">Yes</button>
           <button type="button" @click="handleCitizenship(false)">No</button>
         </div>
         
-        <div v-if="isEU !== null">
+        <!-- Service Selection appears only if no service is selected -->
+        <div v-if="isEU !== null && selectedService === ''">
           <label>Select a service:</label>
           <select v-model="selectedService">
             <option value="">Please select a service</option>
@@ -43,17 +44,29 @@
             <option value="extension">Application for Extension of Residence Permit</option>
           </select>
         </div>
-
+  
+        <!-- File input for EU Citizens -->
         <div v-if="isEU === true && selectedService">
           <label>Please scan your passport or ID:</label>
           <input type="file" @change="handleFileUpload" multiple />
         </div>
-
+  
+        <!-- File input for Non-EU Citizens -->
         <div v-if="isEU === false && selectedService">
           <label>Please scan your passport:</label>
           <input type="file" @change="handleFileUpload" multiple />
         </div>
+        <!-- Dynamic Data Form: appears after file selection -->
 
+        <div v-if="showDataForm" class="dataForm">
+          <h2>Antrag auf Erteilung einer Aufenthaltserlaubnis - Aufenthaltsgesetz (AufenthG)</h2>
+          <div v-for="(value, key) in formDataFields" :key="key" class="form-group">
+            <label>{{ key }}</label>
+            <input type="text" v-model="formDataFields[key]" />
+          </div>
+        </div>
+  
+        <!-- Submit Button -->
         <div v-if="isEU !== null && selectedService && files.length">
           <button type="submit">Submit</button>
         </div>
@@ -61,7 +74,6 @@
     </div>
   </div>
 </template>
-
 
 <script>
 export default {
@@ -71,7 +83,41 @@ export default {
       isEU: null,           // null: not decided, true: EU, false: Non-EU
       selectedService: '',   // Selected service
       files: [],            // Array to hold uploaded files
-      formData: null        // Holds the submitted form data for preview
+      formData: null,   // Holds the submitted form data for preview
+      
+  // Controls display of dynamic data form
+      // Frontend fields with keys as labels and values as initial content
+      formDataFields: {
+        "Familiename": "PULA",
+        "Vornamen": "",
+        "Geburtsdatum": "",
+        "Geburtsort": "",
+        "Geschlecht": "",
+        "Staatsangehörigkeit": "",
+        "Reisepass-Nr.": "",
+        "Datum der Ausstellung": "",
+        "Datum des Ablaufs": "",
+        "Visa Date Of Issue": "",
+        "Visa Date Of Expiry": "",
+        "Aktuelle Adresse": "",
+        "Gesperrtes Konto": "",
+        "Kontostand": "",
+        "Krankenkasse": "",
+        "Beruf": "Student",  // Static value
+        "Name der Schule": "",
+        "Adresse der Schule": "",
+        "Bild": "",
+        "Familienstand": "",
+        "Vorherige Adresse": "",
+        "Größe des Hauses": "",
+        "Strafrechtliche Verurteilungen": "",
+        "Laufende gerichtliche Ermittlungen": "",
+        "Wurde jemals ausgewiesen": "",
+        "Gehört zu einer terroristischen Organisation": "",
+        "Zugehörigkeit zu einer politischen Partei": "",
+        "Jemals die Demokratie gestört": ""
+      }
+   
     };
   },
   methods: {
@@ -83,6 +129,9 @@ export default {
     },
     handleFileUpload(event) {
       this.files = event.target.files;
+      if (this.files.length) {
+        this.showDataForm = true;
+      }
     },
     async handleSubmit() {
       try {
@@ -267,13 +316,107 @@ button:hover {
 button:active {
   transform: translateY(-1px);
 }
-
-input[type="file"], select {
+input[type="file"] {
   margin: 0.6rem;
-  padding: 0.5rem;
-  width: 100%;
-  max-width: 400px;
+  /* Use padding similar to your button for a larger clickable area */
+  padding: 1.3em 3em;
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: 2.5px;
+  font-weight: 500;
+  color: #000;
+  background-color: #fff;
+  border: none;
+  border-radius: 45px;
+  box-shadow: 0px 8px 15px rgba(0, 0, 0, 0.1);
+  transition: all 0.3s ease;
+  cursor: pointer;
+  outline: none;
+}
+
+input[type="file"]:hover {
+  background-color: #23c483;
+  color: #fff;
+  transform: translateY(-3px);
+}
   
+/* Dynamic Data Form Styling */
+.dataForm {
+  margin-top: 2rem;
+  text-align: left;
+  max-width: 600px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.dataForm h2 {
+  text-align: center;
+  margin-bottom: 1.5rem;
+}
+
+.form-group {
+  margin-bottom: 1rem;
+  display: flex;
+  flex-direction: column;
+}
+
+.form-group label {
+  margin-bottom: 0.5rem;
+  font-weight: bold;
+}
+
+.form-group input[type="text"] {
+  padding: 1.3em 1em;
+  font-size: 12px;
+  border: 1px solid #ccc;
+  border-radius: 45px;
+  box-shadow: 0px 8px 15px rgba(0,0,0,0.1);
+  transition: all 0.3s ease;
+  outline: none;
+}
+
+.form-group input[type="text"]:hover {
+  background-color: #23c483;
+  color: #fff;
+  transform: translateY(-3px);
+}
+
+
+
+select {
+  /* Remove default appearance and add custom styling */
+  appearance: none;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  background-color: #fff;
+  border: 1px solid #ccc;
+  border-radius: 45px;
+  padding: 1.3em 3em;
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: 2.5px;
+  font-weight: 500;
+  color: #000;
+  box-shadow: 0px 8px 15px rgba(0, 0, 0, 0.1);
+  transition: all 0.3s ease;
+  cursor: pointer;
+  outline: none;
+  /* Add a custom arrow using a data URI image */
+  background-image: url("data:image/svg+xml;charset=US-ASCII,<svg xmlns='http://www.w3.org/2000/svg' width='10' height='10' viewBox='0 0 4 5'><path fill='%23000' d='M2 0L0 2h4zm0 5L0 3h4z'/></svg>");
+  background-repeat: no-repeat;
+  background-position: right 1em center;
+}
+
+select:hover {
+  background-color: #23c483;
+  color: #fff;
+  transform: translateY(-3px);
+}
+
+/* Minimal styling for option elements */
+select option {
+  background-color: #fff;
+  color: #000;
 }
 
 @media (max-width: 768px) {
