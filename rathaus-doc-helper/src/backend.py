@@ -1,34 +1,4 @@
-# # Dictionary to store English-German word pairs
-# fields = {
-#     "Last Name:Familiename",
-#     "First Name:Vornamen",
-#     "Date Of Birth:Geburtsdatum",
-#     "Place Of Birth:Geburtsort",
-#     "Sex:Geschlecht",
-#     "Citizenship:Staatsangehörigkeit",
-#     "Passport No:Reisepass-Nr.",
-#     "Date Of Issue:Datum der Ausstellung",
-#     "Date Of Expiry:Datum des Ablaufs",
-#     "Visa Date Of Issue:Datum der Ausstellung des Visums",
-#     "Visa Date Of Expiry:Datum des Ablaufs des Visums",
-#     "Current Address:Aktuelle Adresse",
-#     "Blocked Account:Gesperrtes Konto",
-#     "Health Insurance:Krankenkasse",
-#     "Occupation:Beruf",
-#     "Name Of School:Name der Schule",
-#     "Address Of School:Adresse der Schule",
-#     "Picture:Bild",
-#     "Purpose:Zweck",
-#     "Marital Status:Familienstand"
-#     "Prev Address:Vorherige Adresse",
-#     "House Size:Größe des Hauses",
-#     "Criminal Convictions:Strafrechtliche Verurteilungen",
-#     "Ongoing Judicial Investigations:Laufende gerichtliche Ermittlungen",
-#     "Ever Been Expelled:Wurde jemals ausgewiesen"
-#     "Belong To Terrorisst Organization:Gehört zu einer terroristischen Organisation",
-#     "Belong To Political Party:Zugehörigkeit zu einer politischen Partei",
-#     "Ever Disrupted Democracy:Jemals die Demokratie gestört"
-# }
+
 
 import os
 from azure.ai.formrecognizer import DocumentAnalysisClient
@@ -46,8 +16,9 @@ documents = {
     "enrollment": "./samples/EnrollmentLetterSample.pdf",
     "insurance": "./samples/HealthInsuranceSample.pdf",
     "blocked": "./samples/BlockedAccountSample.pdf",
-    "residence":"./samples/HouseRegistrationSample.pdf"
-    # "identity": "./samples/passport.jpg",
+    "residence":"./samples/HouseRegistrationSample.pdf",
+    "identity": "./samples/passport.jpg",
+    # "visa": "./samples/visa.jpg",
 }
 
 # Prebuilt models to use
@@ -55,8 +26,9 @@ models = {
     "enrollment": "prebuilt-invoice",
     "insurance": "prebuilt-invoice",
     "blocked": "prebuilt-receipt",
-    "residence":"prebuilt-invoice"
-    # "identity": "prebuilt-idDocument",
+    "residence":"prebuilt-invoice",
+    "identity": "prebuilt-idDocument",
+    # "visa": "prebuilt-idDocument",
 }
 
 # Keys to extract from each document type
@@ -64,8 +36,40 @@ keys_to_extract = {
     "enrollment": ["VendorName", "VendorAddress"],
     "insurance": ["VendorName"],
     "blocked": ["Total", "MerchantName"],
-    "residence":["CustomerAddress"]
-    # "identity": [""],
+    "residence":["CustomerAddress"],
+    "identity": ["DocumentNumber", "LastName", "FirstName", "DateOfBirth", "PlaceOfBirth", "Sex", "Nationality", "DateOfIssue", "DateOfExpiration"],
+    # "visa": ["DocumentNumber", "LastName", "FirstName", "DateOfBirth", "PlaceOfBirth", "Sex", "Nationality", "DateOfIssue", "DateOfExpiration"],
+}
+
+frontend = {
+    "Familiename": None,
+    "Vornamen": None,
+    "Geburtsdatum": None,
+    "Geburtsort": None,
+    "Geschlecht": None,
+    "Staatsangehörigkeit": None,
+    "Reisepass-Nr.": None,
+    "Datum der Ausstellung": None,
+    "Datum des Ablaufs": None,
+    "Visa Date Of Issue": None,
+    "Visa Date Of Expiry": None,
+    "Aktuelle Adresse": None,
+    "Gesperrtes Konto": None,
+    "Kontostand": None,
+    "Krankenkasse": None,
+    "Beruf": "Student",  # Static value
+    "Name der Schule": None,
+    "Adresse der Schule": None,
+    "Bild": None,
+    "Familienstand": None,
+    "Vorherige Adresse": None,
+    "Größe des Hauses": None,
+    "Strafrechtliche Verurteilungen": None,
+    "Laufende gerichtliche Ermittlungen": None,
+    "Wurde jemals ausgewiesen": None,
+    "Gehört zu einer terroristischen Organisation": None,
+    "Zugehörigkeit zu einer politischen Partei": None,
+    "Jemals die Demokratie gestört": None
 }
 
 # Function to clean and concatenate address fields
@@ -94,19 +98,44 @@ def analyze_document(doc_path, model):
         result = poller.result()
     return result
 
-# Process each document type
 for doc_type, doc_path in documents.items():
     print(f"\nProcessing {doc_type} document...")
     result = analyze_document(doc_path, models[doc_type])
 
-    # Loop through documents in result
     for doc in result.documents:
-        print("\nExtracted Fields:")
         for field in keys_to_extract[doc_type]:
             if field in doc.fields:
-                field_value = doc.fields[field].value
+                field_value = doc.fields[field].value.amount if field == "Total" else doc.fields[field].value
+                
+                # Format address fields properly
                 if field in ["VendorAddress", "CustomerAddress"]:
-                    formatted_address = format_address(field_value)
-                    print(f"{field}: {formatted_address}")
-                else:
-                    print(f"{field}: {field_value}")
+                    field_value = format_address(field_value)
+
+                # Define mapping of document fields to frontend keys
+                field_mapping = {
+                    "LastName": "Familiename",
+                    "FirstName": "Vornamen",
+                    "DateOfBirth": "Geburtsdatum",
+                    "PlaceOfBirth": "Geburtsort",
+                    "Sex": "Geschlecht",
+                    "Nationality": "Staatsangehörigkeit",
+                    "DocumentNumber": "Reisepass-Nr.",
+                    "DateOfIssue": "Datum der Ausstellung",
+                    "DateOfExpiration": "Datum des Ablaufs",
+                    "CustomerAddress": "Aktuelle Adresse",
+                    "MerchantName": "Gesperrtes Konto",
+                    "Total": "Kontostand",
+                    "VendorName": "Krankenkasse" if doc_type == "insurance" else "Name der Schule",
+                    "VendorAddress": "Adresse der Schule",
+                }
+
+                # Ensure correct key assignment
+                mapped_key = field_mapping.get(field)
+                if mapped_key:
+                    frontend[mapped_key] = field_value
+
+
+
+# Debug: Print final JSON-like dictionary
+for key, value in frontend.items():
+    print(f"{key}: {value}")
