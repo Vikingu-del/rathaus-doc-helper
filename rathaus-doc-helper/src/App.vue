@@ -72,15 +72,41 @@ export default {
     handleFileUpload(event) {
       this.files = event.target.files;
     },
-    handleSubmit() {
-      const formPayload = {
-        isRegistered: this.isRegistered,
-        isEU: this.isEU,
-        selectedService: this.selectedService,
-        files: Array.from(this.files).map(file => file.name)
-      };
-      this.formData = formPayload;
-      console.log("Form Submitted:", formPayload);
+    async handleSubmit() {
+      try {
+        const formData = new FormData();
+        
+        formData.append('formData', JSON.stringify({
+          isRegistered: this.isRegistered,
+          isEU: this.isEU,
+          selectedService: this.selectedService
+        }));
+
+        Array.from(this.files).forEach(file => {
+          formData.append('files', file);
+        });
+
+        this.isSubmitting = true;
+
+        const response = await fetch('/api/submitData', {
+          method: 'POST',
+          body: formData
+        });
+
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`);
+        }
+
+        const result = await response.json();
+        this.formData = result;
+        alert('Documents submitted successfully!');
+
+      } catch (error) {
+        console.error('Submission error:', error);
+        alert('Error submitting documents. Please try again.');
+      } finally {
+        this.isSubmitting = false;
+      }
     }
   }
 };
