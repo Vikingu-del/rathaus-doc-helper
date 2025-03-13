@@ -26,10 +26,9 @@ jobs:
           azure_static_web_apps_api_token: ${{ secrets.AZURE_STATIC_WEB_APPS_API_TOKEN_<GENERATED_HOSTNAME> }}
           repo_token: ${{ secrets.GITHUB_TOKEN }}
           action: "upload"
-          # Update these paths to match your repository structure
-          app_location: "/" # App source code path
-          api_location: "api" # Api source code path
-          output_location: "dist" # Built app content directory
+          app_location: "."  # Root of your app
+          api_location: "api"  # API folder
+          output_location: "dist"  # Output directory
 
   close_pull_request_job:
     if: github.event_name == 'pull_request' && github.event.action == 'closed'
