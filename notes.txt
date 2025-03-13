@@ -1,0 +1,7 @@
+form
+  fetching from backend
+  dynamiclly iterate through the json data
+     for each data 
+        will show the specific field in the form
+  the form should be able to be modifyied before submission
+form
