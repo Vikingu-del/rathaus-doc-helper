@@ -62,6 +62,29 @@
         .button:hover {
             background-color: #218838;
         }
+        .loading-container {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            min-height: 300px;
+        }
+        .spinner {
+            border: 6px solid #f3f3f3;
+            border-top: 6px solid #28a745;
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            animation: spin 1s linear infinite;
+            margin-bottom: 20px;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        .hidden {
+            display: none;
+        }
     </style>
 </head>
 <body>
@@ -69,20 +92,59 @@
     <div class="container">
         <h1>Antrag auf Erteilung einer Aufenthaltserlaubnis - Aufenthaltsgesetz (AufenthG)</h1>
 
-        <form id="permitForm">
+        <!-- Loading indicator -->
+        <div id="loading-container" class="loading-container">
+            <div class="spinner"></div>
+            <p>Formular wird geladen...</p>
+        </div>
+
+        <form id="permitForm" class="hidden">
             {% for key, value in form_data.items %}
             <div class="form-group">
                 <label>{{ key }}</label>
                 <input type="text" name="{{ key }}" value="{{ value|default_if_none:'' }}" readonly>
             </div>
             {% endfor %}
+        
+            <div class="button-container">
+                <button type="button" class="button">Akzeptieren</button>
+                <button type="button" class="button">Bearbeiten</button>
+            </div>
         </form>
-
-        <div class="button-container">
-            <button class="button">Akzeptieren</button>
-            <button class="button">Bearbeiten</button>
-        </div>
     </div>
+
+    <script>
+        // Check if form data is available
+        document.addEventListener('DOMContentLoaded', function() {
+            // Get number of form fields
+            const formGroups = document.querySelectorAll('.form-group');
+            
+            // Hide loading and show form if data exists
+            if (formGroups.length > 0) {
+                document.getElementById('loading-container').classList.add('hidden');
+                document.getElementById('permitForm').classList.remove('hidden');
+            }
+            
+            // If using AJAX to fetch form data, you'd do it here instead
+            // For example:
+            /*
+            fetch('/get-form-data')
+                .then(response => response.json())
+                .then(data => {
+                    // Populate the form with data
+                    // ...
+                    
+                    // Hide loading, show form
+                    document.getElementById('loading-container').classList.add('hidden');
+                    document.getElementById('permitForm').classList.remove('hidden');
+                })
+                .catch(error => {
+                    console.error('Error loading form data:', error);
+                    // Show error message
+                });
+            */
+        });
+    </script>
 
 </body>
 </html>
