@@ -148,9 +148,13 @@
                 <input type="file" id="university-upload" onchange="simulateUpload('university-check')">
                 <span id="university-check" class="checkmark">✅</span>
             </div>
+    
+            <!-- Submit Button (Now at the bottom of uploads) -->
+            <div id="submit-container" class="hidden">
+                <button id="submit-button" class="submit-btn" disabled onclick="navigateToSuccess()">Submit</button>
+            </div>
         </div>
     </div>
-
     <script>
         function showScreen2() {
             document.getElementById('screen1').classList.add('hidden');
