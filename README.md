@@ -53,12 +53,15 @@ A tool to help process and manage documents using AI form recognition capabiliti
    python rathaus/manage.py runserver
    ```
 
-3. Access the application:
+2. Access the application:
    Open your browser and navigate to [http://127.0.0.1:8000](http://127.0.0.1:8000)
+   You can also access our server running inside Azure at this ip http://9.141.57.59
 
 ## Check our Presentation link
 
 [View our presentation](https://prezi.com/view/kyRUPFPYCGYUUdbuIELq/)
+
+
 
 ## License
 
