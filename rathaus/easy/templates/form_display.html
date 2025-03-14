@@ -85,6 +85,30 @@
         .hidden {
             display: none;
         }
+        .success-message {
+            text-align: center;
+            padding: 30px 20px;
+        }
+        .success-message h2 {
+            color: #28a745;
+            margin-bottom: 15px;
+        }
+        .success-message p {
+            font-size: 16px;
+            line-height: 1.6;
+            margin-bottom: 15px;
+        }
+        .appointment-info {
+            background-color: #f8f9fa;
+            border-left: 4px solid #28a745;
+            padding: 15px;
+            margin-top: 20px;
+            text-align: left;
+        }
+        .missing-field {
+            background-color: #fff8e6;
+            border: 1px dashed #ffc107;
+        }
     </style>
 </head>
 <body>
@@ -98,51 +122,162 @@
             <p>Formular wird geladen...</p>
         </div>
 
+        <!-- Form container -->
         <form id="permitForm" class="hidden">
             {% for key, value in form_data.items %}
             <div class="form-group">
                 <label>{{ key }}</label>
-                <input type="text" name="{{ key }}" value="{{ value|default_if_none:'' }}" readonly>
+                <input type="text" name="{{ key }}" value="{{ value|default_if_none:'' }}" readonly class="form-input">
             </div>
             {% endfor %}
-        
+            
             <div class="button-container">
-                <button type="button" class="button">Akzeptieren</button>
-                <button type="button" class="button">Bearbeiten</button>
+                <button type="button" id="submit-button" class="button">Absenden</button>
+                <button type="button" id="edit-button" class="button">Bearbeiten</button>
             </div>
         </form>
+
+        <!-- Success message (hidden initially) -->
+        <div id="success-message" class="success-message hidden">
+            <h2>Vielen Dank für Ihre Einreichung!</h2>
+            <p>Ihr Antrag auf Erteilung einer Aufenthaltserlaubnis wurde erfolgreich übermittelt.</p>
+            <p>Sie erhalten in Kürze eine E-Mail mit weiteren Informationen zu Ihrem Antrag.</p>
+            
+            <div class="appointment-info">
+                <p><strong>Nächste Schritte:</strong></p>
+                <p>Bitte warten Sie auf die Bestätigung Ihres Termins. Wir werden Sie per E-Mail informieren, sobald ein Termin für Sie verfügbar ist.</p>
+                <p>Im Falle von Rückfragen können Sie sich unter der Referenznummer <strong id="reference-number">REF-12345</strong> an uns wenden.</p>
+            </div>
+        </div>
     </div>
 
     <script>
-        // Check if form data is available
         document.addEventListener('DOMContentLoaded', function() {
-            // Get number of form fields
+            const loadingContainer = document.getElementById('loading-container');
+            const permitForm = document.getElementById('permitForm');
+            const successMessage = document.getElementById('success-message');
+            const submitButton = document.getElementById('submit-button');
+            const editButton = document.getElementById('edit-button');
+            
+            // Required fields that should be present
+            const requiredFields = [
+                'Familiename', 'Vornamen', 'Geburtsdatum', 'Geburtsort', 'Geschlecht', 
+                'Staatsangehörigkeit', 'Reisepass-Nr.', 'Datum der Ausstellung',
+                'Datum des Ablaufs', 'Visa Date Of Issue', 'Visa Date Of Expiry',
+                'Aktuelle Adresse', 'Gesperrtes Konto', 'Kontostand', 'Krankenkasse',
+                'Beruf', 'Name der Schule', 'Adresse der Schule', 'Bild',
+                'Familienstand', 'Vorherige Adresse', 'Größe des Hauses',
+                'Strafrechtliche Verurteilungen', 'Laufende gerichtliche Ermittlungen',
+                'Wurde jemals ausgewiesen', 'Gehört zu einer terroristischen Organisation',
+                'Zugehörigkeit zu einer politischen Partei', 'Jemals die Demokratie gestört'
+            ];
+            
+            // Get form fields
             const formGroups = document.querySelectorAll('.form-group');
             
-            // Hide loading and show form if data exists
+            // Hide loading if form data exists
             if (formGroups.length > 0) {
-                document.getElementById('loading-container').classList.add('hidden');
-                document.getElementById('permitForm').classList.remove('hidden');
+                loadingContainer.classList.add('hidden');
+                permitForm.classList.remove('hidden');
+                
+                // Add any missing required fields
+                addMissingRequiredFields();
             }
             
-            // If using AJAX to fetch form data, you'd do it here instead
-            // For example:
-            /*
-            fetch('/get-form-data')
-                .then(response => response.json())
-                .then(data => {
-                    // Populate the form with data
-                    // ...
+            // Function to add any missing required fields
+            function addMissingRequiredFields() {
+                const existingFields = Array.from(formGroups).map(group => 
+                    group.querySelector('label').textContent.trim()
+                );
+                
+                // Find missing required fields
+                const missingFields = requiredFields.filter(field => 
+                    !existingFields.includes(field)
+                );
+                
+                // Add missing fields to the form
+                missingFields.forEach(field => {
+                    const formGroup = document.createElement('div');
+                    formGroup.className = 'form-group';
                     
-                    // Hide loading, show form
-                    document.getElementById('loading-container').classList.add('hidden');
-                    document.getElementById('permitForm').classList.remove('hidden');
-                })
-                .catch(error => {
-                    console.error('Error loading form data:', error);
-                    // Show error message
+                    const label = document.createElement('label');
+                    label.textContent = field;
+                    formGroup.appendChild(label);
+                    
+                    const input = document.createElement('input');
+                    input.type = 'text';
+                    input.name = field;
+                    input.value = '';
+                    input.classList.add('missing-field', 'form-input');
+                    input.placeholder = 'Bitte ausfüllen';
+                    input.setAttribute('readonly', true);
+                    formGroup.appendChild(input);
+                    
+                    permitForm.insertBefore(formGroup, permitForm.querySelector('.button-container'));
                 });
-            */
+            }
+
+            // Toggle form field editability - FIXED VERSION
+            editButton.addEventListener('click', function() {
+                const inputs = document.querySelectorAll('.form-input');
+                console.log("Found inputs:", inputs.length);
+                
+                if (editButton.textContent === 'Bearbeiten') {
+                    // Make fields editable
+                    inputs.forEach(input => {
+                        input.removeAttribute('readonly');
+                        input.style.backgroundColor = '#fff';
+                        input.style.border = '1px solid #4CAF50';
+                    });
+                    editButton.textContent = 'Fertig';
+                } else {
+                    // Make fields readonly again
+                    inputs.forEach(input => {
+                        input.setAttribute('readonly', 'readonly');
+                        input.style.backgroundColor = '';
+                        input.style.border = '1px solid #ccc';
+                    });
+                    editButton.textContent = 'Bearbeiten';
+                }
+            });
+
+            // Handle form submission
+            submitButton.addEventListener('click', function() {
+                // Show loading during submission
+                loadingContainer.classList.remove('hidden');
+                permitForm.classList.add('hidden');
+                
+                // Get all form data
+                const formData = new FormData(permitForm);
+                const formDataObject = Object.fromEntries(formData.entries());
+                
+                // In a real application, send data to backend
+                // fetch('/api/submit-form', {
+                //     method: 'POST',
+                //     headers: {
+                //         'Content-Type': 'application/json',
+                //     },
+                //     body: JSON.stringify(formDataObject),
+                // })
+                
+                // For this demo, simulate a server response
+                setTimeout(function() {
+                    loadingContainer.classList.add('hidden');
+                    
+                    // Generate a random reference number
+                    document.getElementById('reference-number').textContent = 
+                        'REF-' + Math.floor(10000 + Math.random() * 90000);
+                    
+                    // Show success message
+                    successMessage.classList.remove('hidden');
+                }, 1500); // Simulate server processing time
+            });
+
+            // Initialize with edit mode available immediately after load
+            setTimeout(function() {
+                // Trigger the edit mode automatically at start
+                editButton.click();
+            }, 500);
         });
     </script>
 
