@@ -54,7 +54,7 @@ A tool to help process and manage documents using AI form recognition capabiliti
    ```
 
 3. Access the application:
-   Open your browser and navigate to [http://localhost:8000](http://localhost:8000)
+   Open your browser and navigate to [http://127.0.0.1:8000](http://127.0.0.1:8000)
 
 ## Check our Presentation link
 
