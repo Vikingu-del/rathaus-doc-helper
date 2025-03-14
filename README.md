@@ -56,6 +56,10 @@ A tool to help process and manage documents using AI form recognition capabiliti
 3. Access the application:
    Open your browser and navigate to [http://localhost:8000](http://localhost:8000)
 
+## Check our Presentation link
+
+[View our presentation](https://prezi.com/view/kyRUPFPYCGYUUdbuIELq/)
+
 ## License
 
 [Add license information here]
