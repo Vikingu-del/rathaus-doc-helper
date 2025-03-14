@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Rathaus Registration</title>
+    <style>
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            background-color: #f4f4f4;
+            font-family: Arial, sans-serif;
+            text-align: center;
+        }
+        .container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 30px;
+        }
+        .button-container {
+            display: flex;
+            gap: 20px;
+        }
+        .button {
+            width: 200px;
+            height: 200px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background-color: #28a745;
+            color: white;
+            font-size: 20px;
+            font-weight: bold;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            text-align: center;
+            transition: background 0.3s;
+        }
+        .button:hover {
+            background-color: #218838;
+        }
+        .hidden {
+            display: none;
+        }
+        h1 {
+            font-size: 24px;
+        }
+        .upload-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 15px;
+        }
+        .upload-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .upload-button {
+            padding: 10px 20px;
+            background-color: #d6d6d6;
+            color: black;
+            font-size: 16px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        .upload-button:hover {
+            background-color: #c0c0c0;
+        }
+        .checkmark {
+            font-size: 24px;
+            color: green;
+            display: none;
+        }
+        input[type="file"] {
+            display: none;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- First screen -->
+    <div id="screen1" class="container">
+        <div class="button-container">
+            <button class="button" onclick="showScreen2()">New Resident</button>
+            <button class="button" onclick="alert('Existing Resident Selected')">Existing Resident</button>
+        </div>
+    </div>
+
+    <!-- Second screen -->
+    <div id="screen2" class="container hidden">
+        <div class="button-container">
+            <button class="button" onclick="alert('EU Citizen Selected')">EU Citizen</button>
+            <button class="button" onclick="showScreen3()">Non-EU Citizen</button>
+        </div>
+    </div>
+
+    <!-- Third screen -->
+    <div id="screen3" class="container hidden">
+        <h1>Apply for:</h1>
+        <div class="button-container">
+            <button class="button" onclick="showScreen4()">Residence Permit</button>
+            <button class="button" onclick="alert('Address Registration Selected')">Address Registration</button>
+        </div>
+    </div>
+
+    <!-- Fourth screen -->
+    <div id="screen4" class="container hidden">
+        <h1>Are you here for...</h1>
+        <div class="button-container">
+            <button class="button" onclick="showScreen5()">Studies</button>
+            <button class="button" onclick="alert('Work Selected')">Work</button>
+            <button class="button" onclick="alert('Family Selected')">Family</button>
+        </div>
+    </div>
+
+    <!-- Fifth screen: Document upload -->
+    <div id="screen5" class="container hidden">
+        <h1>Scan your documents</h1>
+        <div class="upload-container">
+            <div class="upload-item">
+                <label for="passport-upload" class="upload-button">Upload Passport</label>
+                <input type="file" id="passport-upload" onchange="simulateUpload('passport-check')">
+                <span id="passport-check" class="checkmark">✅</span>
+            </div>
+            <div class="upload-item">
+                <label for="insurance-upload" class="upload-button">Upload Health Insurance</label>
+                <input type="file" id="insurance-upload" onchange="simulateUpload('insurance-check')">
+                <span id="insurance-check" class="checkmark">✅</span>
+            </div>
+            <div class="upload-item">
+                <label for="blocked-upload" class="upload-button">Upload Blocked Account</label>
+                <input type="file" id="blocked-upload" onchange="simulateUpload('blocked-check')">
+                <span id="blocked-check" class="checkmark">✅</span>
+            </div>
+            <div class="upload-item">
+                <label for="address-upload" class="upload-button">Upload Address Registration</label>
+                <input type="file" id="address-upload" onchange="simulateUpload('address-check')">
+                <span id="address-check" class="checkmark">✅</span>
+            </div>
+            <div class="upload-item">
+                <label for="university-upload" class="upload-button">Upload University Enrollment Letter</label>
+                <input type="file" id="university-upload" onchange="simulateUpload('university-check')">
+                <span id="university-check" class="checkmark">✅</span>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function showScreen2() {
+            document.getElementById('screen1').classList.add('hidden');
+            document.getElementById('screen2').classList.remove('hidden');
+        }
+
+        function showScreen3() {
+            document.getElementById('screen2').classList.add('hidden');
+            document.getElementById('screen3').classList.remove('hidden');
+        }
+
+        function showScreen4() {
+            document.getElementById('screen3').classList.add('hidden');
+            document.getElementById('screen4').classList.remove('hidden');
+        }
+
+        function showScreen5() {
+            document.getElementById('screen4').classList.add('hidden');
+            document.getElementById('screen5').classList.remove('hidden');
+        }
+
+        function simulateUpload(id) {
+            document.getElementById(id).style.display = 'inline'; // Show green checkmark
+        }
+    </script>
+
+    <!-- Submit Button -->
+    <p id="submit-container" class="hidden">
+      <button id="submit-button" class="submit-btn" disabled onclick="navigateToSuccess()">Submit</button>
+    </p>
+    
+    <style>
+      .submit-btn {
+          padding: 10px 20px;
+          font-size: 16px;
+          background-color: #28a745;
+          color: white;
+          border: none;
+          border-radius: 5px;
+          cursor: pointer;
+          transition: background 0.3s;
+      }
+      .submit-btn:hover {
+          background-color: #218838;
+      }
+      .submit-btn:disabled {
+          background-color: #a5d6a7;
+          cursor: not-allowed;
+      }
+    </style>
+    
+    <script>
+      const requiredUploads = ['passport-upload', 'insurance-upload', 'blocked-upload', 'address-upload', 'university-upload'];
+      let uploadedFiles = new Set();
+    
+      function simulateUpload(id) {
+          document.getElementById(id).style.display = 'inline'; // Show checkmark
+          uploadedFiles.add(id); // Mark file as uploaded
+          checkAllUploadsCompleted();
+      }
+    
+      function checkAllUploadsCompleted() {
+          if (uploadedFiles.size === requiredUploads.length) {
+              document.getElementById('submit-container').classList.remove('hidden'); // Show submit button
+              document.getElementById('submit-button').disabled = false; // Enable button
+          }
+      }
+    
+      function navigateToSuccess() {
+          window.location.href = "/success"; // Redirect to backend success page
+      }
+    </script>
+
+</body>
+</html>
